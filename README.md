@@ -3,8 +3,6 @@
 ### App Development
 - **Flutter** (`v3.32.x+`) 
 - **Dart** (`v3.8.x+`) 
-- **Riverpod** (`v2.x+`) 
-- **GoRouter** 
 
 ## How to Use the Project
 
