@@ -41,6 +41,7 @@ flutter build appbundle --flavor production -t lib/main_production.dart
 
 Once built, your .aab file will be located at:
 
-build/app/outputs/bundle/productionRelease/app-production-release.aab
-
+```
+arsemed/build/app/outputs/bundle/productionRelease/app-production-release.aab
+```
 You can now upload this .aab file to the Google Play Console for release or testing.
