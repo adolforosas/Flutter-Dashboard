@@ -1,16 +1,46 @@
 # Arsemed
 
-A new Flutter project.
+### App Development
+- **Flutter** (`v3.32.x+`) 
+- **Dart** (`v3.8.x+`) 
+- **Riverpod** (`v2.x+`) 
+- **GoRouter** 
 
-## Getting Started
+## How to Use the Project
 
-This project is a starting point for a Flutter application.
+Assure that Flutter is already installed on your computer.
 
-A few resources to get you started if this is your first Flutter project:
+1. Clone the project
+```
+git clone https://github.com/adolforosas/Flutter-Dashboard.git
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+2. Open the project on your preferred IDE and add dependencies:
+```
+flutter pub get
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+3. Run the project:
+
+* Open an Android emulator.
+  
+* Run the following command to build and run the project in development mode:
+```
+flutter build apk --debug --flavor development -t lib/main_development.dart
+```
+
+* To create a release version of the application run the command:
+```
+flutter build apk release --flavor production -t lib/main_production.dart
+```
+
+* To get the AAB of the project, run the command:
+```
+flutter build appbundle --flavor production -t lib/main_production.dart
+```
+
+Once built, your .aab file will be located at:
+
+build/app/outputs/bundle/productionRelease/app-production-release.aab
+
+You can now upload this .aab file to the Google Play Console for release or testing.
