@@ -1,6 +1,6 @@
 {
-    "name": "prueba_app",
-    "short_name": "prueba_app",
+    "name": "arsemed",
+    "short_name": "arsemed",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

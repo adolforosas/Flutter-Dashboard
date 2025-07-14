@@ -1,4 +1,4 @@
-package com.example.prueba_app
+package com.arsemed.arsemed
 
 import io.flutter.embedding.android.FlutterActivity
 

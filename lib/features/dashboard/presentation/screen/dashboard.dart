@@ -1,21 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:http/http.dart' as http;
-import 'package:csv/csv.dart';
 import 'dart:convert';
 
-void main() => runApp(const MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const DashboardPage(),
-    );
-  }
-}
+import 'package:csv/csv.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -169,22 +157,16 @@ class _DashboardPageState extends State<DashboardPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // 🔵 AÑADIMOS AQUÍ EL HEADER FIJO (nuevo)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Image.asset('assets/images/logo.png', height: 60),
-                  const SizedBox(
-                    width: 0,
-                  ), // Aumenta este valor si necesitas más separación
-
+                  const SizedBox(width: 0),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(
-                        left: 0,
-                      ), // Ajusta el valor según necesites
+                      padding: const EdgeInsets.only(left: 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: const [
@@ -200,7 +182,6 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ),
                   ),
-
                   DropdownButton<int>(
                     value: anioSeleccionado,
                     dropdownColor: Color(0xFF1A2B4C),
@@ -225,166 +206,83 @@ class _DashboardPageState extends State<DashboardPage> {
                 ],
               ),
             ),
-            const SizedBox(
-              height: 12,
-            ), // 👈 Aumenta este valor para más espacio
-            // ⚪️ Aquí continúa tu SingleChildScrollView actual tal cual:
+            const SizedBox(height: 12),
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
+              child: RefreshIndicator(
+                color: Colors.orange,
+                onRefresh: () async {
+                  setState(() {
+                    showIndicators = false;
+                    showCharts = false;
+                    showTable = false;
+                  });
 
-                    if (!showIndicators)
-                      _buildLoadingMessage()
-                    else
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                        ), // Ajusta este valor a tu gusto
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildIndicator(
-                                    'Contratado',
-                                    contratado,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: _buildIndicator(
-                                    'Contratos',
-                                    contratos,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildIndicator('Empresas', empresas),
-                                ),
-                                Expanded(
-                                  child: _buildIndicator(
-                                    'Instituciones',
-                                    instituciones,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                  await cargarTodosLosArchivos();
 
-                    const SizedBox(height: 20),
-                    FutureBuilder<void>(
-                      future: datosCargados,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState != ConnectionState.done) {
-                          return _buildLoadingMessage();
-                        } else if (snapshot.hasError) {
-                          return Text(
-                            'Error: ${snapshot.error}',
-                            style: TextStyle(color: Colors.red),
-                          );
-                        } else {
-                          return Column(
+                  setState(() {
+                    showIndicators = true;
+                  });
+                  await Future.delayed(const Duration(milliseconds: 600));
+                  setState(() {
+                    showCharts = true;
+                  });
+                  await Future.delayed(const Duration(milliseconds: 600));
+                  setState(() {
+                    showTable = true;
+                  });
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 10),
+
+                      if (!showIndicators)
+                        _buildLoadingMessage()
+                      else
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Column(
                             children: [
-                              _buildBarChart(
-                                chartTitle:
-                                    'Instituciones con más compras (Millones)',
-                                maxY: calcularMaxY(
-                                  'top_10_instituciones_${anioSeleccionado}2.csv',
-                                ),
-                                barGroups: [
-                                  for (
-                                    int i = 1;
-                                    i <
-                                        (todosLosDatos['top_10_instituciones_${anioSeleccionado}2.csv']
-                                                ?.length ??
-                                            0);
-                                    i++
-                                  )
-                                    _makeBarGroup(
-                                      double.tryParse(
-                                            todosLosDatos['top_10_instituciones_${anioSeleccionado}2.csv']![i][1]
-                                                .toString(),
-                                          ) ??
-                                          0.0,
-                                      i,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildIndicator(
+                                      'Contratado',
+                                      contratado,
                                     ),
+                                  ),
+                                  Expanded(
+                                    child: _buildIndicator(
+                                      'Contratos',
+                                      contratos,
+                                    ),
+                                  ),
                                 ],
-                                bottomLabels: {
-                                  for (
-                                    int i = 1;
-                                    i <
-                                        (todosLosDatos['top_10_instituciones_${anioSeleccionado}2.csv']
-                                                ?.length ??
-                                            0);
-                                    i++
-                                  )
-                                    i: todosLosDatos['top_10_instituciones_${anioSeleccionado}2.csv']![i][0]
-                                        .toString(),
-                                },
                               ),
-
-                              const SizedBox(height: 30),
-                              _buildBarChart(
-                                chartTitle:
-                                    'Empresas con más ventas (Millones)',
-                                maxY: calcularMaxY(
-                                  'top_10_empresas_${anioSeleccionado}2.csv',
-                                ),
-                                barGroups: [
-                                  for (
-                                    int i = 1;
-                                    i <
-                                        (todosLosDatos['top_10_empresas_${anioSeleccionado}2.csv']
-                                                ?.length ??
-                                            0);
-                                    i++
-                                  )
-                                    _makeBarGroup(
-                                      double.tryParse(
-                                            todosLosDatos['top_10_empresas_${anioSeleccionado}2.csv']![i][1]
-                                                .toString(),
-                                          ) ??
-                                          0.0,
-                                      i,
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildIndicator(
+                                      'Empresas',
+                                      empresas,
                                     ),
+                                  ),
+                                  Expanded(
+                                    child: _buildIndicator(
+                                      'Instituciones',
+                                      instituciones,
+                                    ),
+                                  ),
                                 ],
-                                bottomLabels: {
-                                  for (
-                                    int i = 1;
-                                    i <
-                                        (todosLosDatos['top_10_empresas_${anioSeleccionado}2.csv']
-                                                ?.length ??
-                                            0);
-                                    i++
-                                  )
-                                    i: todosLosDatos['top_10_empresas_${anioSeleccionado}2.csv']![i][0]
-                                        .toString(),
-                                },
                               ),
                             ],
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 30),
-                    const Center(
-                      child: Text(
-                        'Los 10 contratos más grandes',
-                        style: TextStyle(color: Colors.white, fontSize: 24),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    if (!showTable)
-                      _buildLoadingMessage()
-                    else
+                          ),
+                        ),
+
+                      const SizedBox(height: 20),
                       FutureBuilder<void>(
                         future: datosCargados,
                         builder: (context, snapshot) {
@@ -397,13 +295,120 @@ class _DashboardPageState extends State<DashboardPage> {
                               style: TextStyle(color: Colors.red),
                             );
                           } else {
-                            final archivo = 'top10_${anioSeleccionado}.csv';
-                            final data = todosLosDatos[archivo] ?? [];
-                            return _buildTopContractsTable(data);
+                            return Column(
+                              children: [
+                                _buildBarChart(
+                                  chartTitle:
+                                      'Instituciones con más compras (Millones)',
+                                  maxY: calcularMaxY(
+                                    'top_10_instituciones_${anioSeleccionado}2.csv',
+                                  ),
+                                  barGroups: [
+                                    for (
+                                      int i = 1;
+                                      i <
+                                          (todosLosDatos['top_10_instituciones_${anioSeleccionado}2.csv']
+                                                  ?.length ??
+                                              0);
+                                      i++
+                                    )
+                                      _makeBarGroup(
+                                        double.tryParse(
+                                              todosLosDatos['top_10_instituciones_${anioSeleccionado}2.csv']![i][1]
+                                                  .toString(),
+                                            ) ??
+                                            0.0,
+                                        i,
+                                      ),
+                                  ],
+                                  bottomLabels: {
+                                    for (
+                                      int i = 1;
+                                      i <
+                                          (todosLosDatos['top_10_instituciones_${anioSeleccionado}2.csv']
+                                                  ?.length ??
+                                              0);
+                                      i++
+                                    )
+                                      i: todosLosDatos['top_10_instituciones_${anioSeleccionado}2.csv']![i][0]
+                                          .toString(),
+                                  },
+                                ),
+
+                                const SizedBox(height: 30),
+                                _buildBarChart(
+                                  chartTitle:
+                                      'Empresas con más ventas (Millones)',
+                                  maxY: calcularMaxY(
+                                    'top_10_empresas_${anioSeleccionado}2.csv',
+                                  ),
+                                  barGroups: [
+                                    for (
+                                      int i = 1;
+                                      i <
+                                          (todosLosDatos['top_10_empresas_${anioSeleccionado}2.csv']
+                                                  ?.length ??
+                                              0);
+                                      i++
+                                    )
+                                      _makeBarGroup(
+                                        double.tryParse(
+                                              todosLosDatos['top_10_empresas_${anioSeleccionado}2.csv']![i][1]
+                                                  .toString(),
+                                            ) ??
+                                            0.0,
+                                        i,
+                                      ),
+                                  ],
+                                  bottomLabels: {
+                                    for (
+                                      int i = 1;
+                                      i <
+                                          (todosLosDatos['top_10_empresas_${anioSeleccionado}2.csv']
+                                                  ?.length ??
+                                              0);
+                                      i++
+                                    )
+                                      i: todosLosDatos['top_10_empresas_${anioSeleccionado}2.csv']![i][0]
+                                          .toString(),
+                                  },
+                                ),
+                              ],
+                            );
                           }
                         },
                       ),
-                  ],
+                      const SizedBox(height: 30),
+                      const Center(
+                        child: Text(
+                          'Los 10 contratos más grandes',
+                          style: TextStyle(color: Colors.white, fontSize: 24),
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      if (!showTable)
+                        _buildLoadingMessage()
+                      else
+                        FutureBuilder<void>(
+                          future: datosCargados,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState !=
+                                ConnectionState.done) {
+                              return _buildLoadingMessage();
+                            } else if (snapshot.hasError) {
+                              return Text(
+                                'Error: ${snapshot.error}',
+                                style: TextStyle(color: Colors.red),
+                              );
+                            } else {
+                              final archivo = 'top10_$anioSeleccionado.csv';
+                              final data = todosLosDatos[archivo] ?? [];
+                              return _buildTopContractsTable(data);
+                            }
+                          },
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -417,7 +422,7 @@ class _DashboardPageState extends State<DashboardPage> {
     padding: const EdgeInsets.symmetric(vertical: 40),
     child: Column(
       children: const [
-        CircularProgressIndicator(color: Colors.orange),
+        Center(child: CircularProgressIndicator(color: Colors.orange)),
         SizedBox(height: 10),
         Text('Cargando...', style: TextStyle(color: Colors.white)),
       ],
@@ -538,7 +543,7 @@ class _DashboardPageState extends State<DashboardPage> {
         BarChartRodData(
           toY: value,
           width: 60,
-          color: const Color(0xFF4974A5), // corregido el valor hexadecimal
+          color: const Color(0xFF4974A5),
           borderRadius: BorderRadius.zero,
         ),
       ],
